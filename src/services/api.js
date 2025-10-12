@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Production API URL - Vercel 환경 변수가 작동 안 할 경우 대비
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://nothingworryappback.onrender.com/api';
+
+// 디버깅: API URL 확인 (개발 중에만 표시)
+if (import.meta.env.DEV) {
+  console.log('🔧 API Base URL:', API_BASE_URL);
+  console.log('🔧 Environment:', import.meta.env.MODE);
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
