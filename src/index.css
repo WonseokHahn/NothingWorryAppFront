@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Tailwind CSS 4.0 커스텀 속성 정의 */
+@theme {
+  /* 커스텀 색상 */
+  --color-vhs-purple: #8B5CF6;
+  --color-toxic-green: #A0FFB8;
+  --color-ash-beige: #DAD7CD;
+  --color-dark-void: #1a1a1a;
+
+  /* 커스텀 폰트 */
+  --font-family-pixel: "Press Start 2P", cursive;
+  --font-family-retro: "Courier New", monospace;
+
+  /* 커스텀 애니메이션 */
+  --animate-glitch: glitch 1s linear infinite;
+  --animate-vhs-noise: vhs-noise 0.5s infinite;
+  --animate-slow-pulse: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 키프레임 애니메이션 */
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+@keyframes vhs-noise {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
+}
+
+/* Base 스타일 */
+body {
+  background-color: var(--color-dark-void);
+  color: var(--color-ash-beige);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* 커스텀 컴포넌트 클래스 */
+.vhs-effect {
+  position: relative;
+}
+
+.vhs-effect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  animation: vhs-noise 0.5s infinite;
+}
+
+.crt-scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.crt-scanline::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+.glitch-text {
+  position: relative;
+  animation: glitch 1s linear infinite;
+}
+
+.btn-retro {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-vhs-purple);
+  color: white;
+  font-family: var(--font-family-retro);
+  border: 2px solid var(--color-toxic-green);
+  transition: all 0.3s;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-retro:hover {
+  background-color: var(--color-toxic-green);
+  color: var(--color-dark-void);
+  box-shadow: 0 10px 15px -3px rgba(160, 255, 184, 0.5);
+}
+
+.card-retro {
+  background: linear-gradient(to bottom right, rgb(17 24 39), rgb(55 65 81));
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-retro::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+.text-shadow-neon {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
+
+/* 다크 모드 기본 설정 */
+.dark {
+  color-scheme: dark;
+}
