@@ -123,7 +123,7 @@ const Layout = ({ children }) => {
                 }}
                 className="p-3 mt-2 rounded-lg font-retro bg-red-900/50 hover:bg-red-900/70 border border-red-700 transition-colors text-left whitespace-nowrap"
               >
-                로그아웃
+                OUT
               </button>
             </nav>
           </motion.div>
