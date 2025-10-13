@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 const ForumPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editPostTitle, setEditPostTitle] = useState('');
+  const [editPostContent, setEditPostContent] = useState('');
 
   useEffect(() => {
     fetchPost();
@@ -47,6 +52,51 @@ const ForumPost = () => {
       alert('댓글 작성에 실패했습니다.');
     } finally {
       setPosting(false);
+    }
+  };
+
+  const canEdit = (resource) => {
+    return user && (user.id === resource.user_id || user.id === 1);
+  };
+
+  const handleEditPost = async () => {
+    if (!editPostTitle.trim() || !editPostContent.trim()) return;
+
+    try {
+      await api.put(`/forum/posts/${id}`, {
+        title: editPostTitle,
+        content: editPostContent
+      });
+      setEditingPostId(null);
+      await fetchPost();
+    } catch (error) {
+      console.error('Failed to edit post:', error);
+      alert(error.response?.data?.error || '수정에 실패했습니다.');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!confirm('정말 삭제하시겠습니까? 게시글과 모든 댓글이 삭제됩니다.')) return;
+
+    try {
+      await api.delete(`/forum/posts/${id}`);
+      alert('게시글이 삭제되었습니다.');
+      navigate('/forum');
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      alert(error.response?.data?.error || '삭제에 실패했습니다.');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+      await api.delete(`/forum/comments/${commentId}`);
+      await fetchPost();
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      alert(error.response?.data?.error || '삭제에 실패했습니다.');
     }
   };
 
@@ -87,13 +137,95 @@ const ForumPost = () => {
             borderColor: 'var(--color-vhs-purple)'
           }}
         >
-          <h1 className="text-3xl font-retro mb-4">{post.title}</h1>
-          <div className="flex items-center gap-4 text-sm text-gray-400 mb-6">
-            <span>👤 {post.username}</span>
-            <span>👁️ {post.views}회</span>
-            <span>{new Date(post.created_at).toLocaleString('ko-KR')}</span>
-          </div>
-          <p className="text-lg whitespace-pre-wrap mb-6">{post.content}</p>
+          {editingPostId === post.id ? (
+            // 수정 모드
+            <div className="space-y-4">
+              <input
+                type="text"
+                value={editPostTitle}
+                onChange={(e) => setEditPostTitle(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border-2 font-retro text-2xl"
+                style={{
+                  backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                  borderColor: 'var(--color-vhs-purple)',
+                  color: 'var(--color-ash-beige)'
+                }}
+                placeholder="제목"
+                maxLength={100}
+              />
+              <textarea
+                value={editPostContent}
+                onChange={(e) => setEditPostContent(e.target.value)}
+                className="w-full h-64 px-4 py-3 rounded-lg border-2 resize-none"
+                style={{
+                  backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                  borderColor: 'var(--color-vhs-purple)',
+                  color: 'var(--color-ash-beige)'
+                }}
+                placeholder="내용"
+                maxLength={2000}
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => {
+                    setEditingPostId(null);
+                    setEditPostTitle('');
+                    setEditPostContent('');
+                  }}
+                  className="px-4 py-2 rounded-lg font-retro"
+                  style={{ backgroundColor: 'rgba(139, 92, 246, 0.2)' }}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleEditPost}
+                  className="px-4 py-2 rounded-lg font-retro"
+                  style={{ backgroundColor: 'var(--color-vhs-purple)', color: 'white' }}
+                >
+                  저장
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between items-start mb-4">
+                <h1 className="text-3xl font-retro flex-1">{post.title}</h1>
+                {canEdit(post) && (
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => {
+                        setEditingPostId(post.id);
+                        setEditPostTitle(post.title);
+                        setEditPostContent(post.content);
+                      }}
+                      className="text-xs px-3 py-1 rounded hover:opacity-80"
+                      style={{ backgroundColor: 'rgba(160, 255, 184, 0.2)', color: 'var(--color-toxic-green)' }}
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={handleDeletePost}
+                      className="text-xs px-3 py-1 rounded hover:opacity-80"
+                      style={{ backgroundColor: 'rgba(255, 0, 0, 0.2)', color: '#ff6b6b' }}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-4 text-sm text-gray-400 mb-6">
+                <span>👤 {post.username}</span>
+                {user?.id === 1 && (
+                  <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
+                    👤 user_id: {post.user_id}
+                  </span>
+                )}
+                <span>👁️ {post.views}회</span>
+                <span>{new Date(post.created_at).toLocaleString('ko-KR')}</span>
+              </div>
+              <p className="text-lg whitespace-pre-wrap mb-6">{post.content}</p>
+            </>
+          )}
 
           {/* AI 철학자 응답 */}
           {post.ai_response && (
@@ -169,9 +301,25 @@ const ForumPost = () => {
                 borderColor: 'rgba(139, 92, 246, 0.2)'
               }}
             >
-              <div className="flex items-center gap-3 mb-2 text-sm text-gray-400">
-                <span className="font-retro">{comment.username}</span>
-                <span>{new Date(comment.created_at).toLocaleString('ko-KR')}</span>
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-3 text-sm text-gray-400">
+                  <span className="font-retro">{comment.username}</span>
+                  {user?.id === 1 && (
+                    <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
+                      👤 user_id: {comment.user_id}
+                    </span>
+                  )}
+                  <span>{new Date(comment.created_at).toLocaleString('ko-KR')}</span>
+                </div>
+                {canEdit(comment) && (
+                  <button
+                    onClick={() => handleDeleteComment(comment.id)}
+                    className="text-xs px-3 py-1 rounded hover:opacity-80"
+                    style={{ backgroundColor: 'rgba(255, 0, 0, 0.2)', color: '#ff6b6b' }}
+                  >
+                    삭제
+                  </button>
+                )}
               </div>
               <p className="text-gray-300">{comment.content}</p>
             </motion.div>

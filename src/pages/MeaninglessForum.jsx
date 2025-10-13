@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 const MeaninglessForum = () => {
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('all');
@@ -41,6 +43,23 @@ const MeaninglessForum = () => {
       relationship: '#FF6B9D'
     };
     return colors[cat] || '#8B5CF6';
+  };
+
+  const canEdit = (post) => {
+    return user && (user.id === post.user_id || user.id === 1);
+  };
+
+  const handleDeletePost = async (e, postId) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    if (!confirm('정말 삭제하시겠습니까? 게시글과 모든 댓글이 삭제됩니다.')) return;
+
+    try {
+      await api.delete(`/forum/posts/${postId}`);
+      await fetchPosts();
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      alert(error.response?.data?.error || '삭제에 실패했습니다.');
+    }
   };
 
   return (
@@ -135,11 +154,27 @@ const MeaninglessForum = () => {
                       <p className="text-gray-300 line-clamp-2">{post.content}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span>👤 {post.username}</span>
-                    <span>💬 {post.comment_count}개 댓글</span>
-                    <span>👁️ {post.views}회</span>
-                    <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <span>👤 {post.username}</span>
+                      {user?.id === 1 && (
+                        <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
+                          👤 user_id: {post.user_id}
+                        </span>
+                      )}
+                      <span>💬 {post.comment_count}개 댓글</span>
+                      <span>👁️ {post.views}회</span>
+                      <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
+                    </div>
+                    {canEdit(post) && (
+                      <button
+                        onClick={(e) => handleDeletePost(e, post.id)}
+                        className="text-xs px-3 py-1 rounded hover:opacity-80"
+                        style={{ backgroundColor: 'rgba(255, 0, 0, 0.2)', color: '#ff6b6b' }}
+                      >
+                        삭제
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               ))}

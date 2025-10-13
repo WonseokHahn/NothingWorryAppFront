@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
 const SharedEmotionBoard = () => {
+  const { user } = useAuth();
   const [emotions, setEmotions] = useState([]);
   const [topEmotion, setTopEmotion] = useState(null);
   const [newEmotion, setNewEmotion] = useState('');
-  const [sortBy, setSortBy] = useState('recent'); // 'recent' or 'popular'
+  const [editingId, setEditingId] = useState(null);
+  const [editContent, setEditContent] = useState('');
+  const [sortBy, setSortBy] = useState('recent');
   const [loading, setLoading] = useState(false);
   const [isPosting, setIsPosting] = useState(false);
 
@@ -58,6 +62,35 @@ const SharedEmotionBoard = () => {
     }
   };
 
+  const handleEdit = async (emotionId) => {
+    if (!editContent.trim()) return;
+
+    try {
+      await api.put(`/shared-emotions/${emotionId}`, {
+        content: editContent
+      });
+      setEditingId(null);
+      setEditContent('');
+      await fetchEmotions();
+    } catch (error) {
+      console.error('Failed to edit emotion:', error);
+      alert(error.response?.data?.error || '수정에 실패했습니다.');
+    }
+  };
+
+  const handleDelete = async (emotionId) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    try {
+      await api.delete(`/shared-emotions/${emotionId}`);
+      await fetchEmotions();
+      await fetchTopEmotion();
+    } catch (error) {
+      console.error('Failed to delete emotion:', error);
+      alert(error.response?.data?.error || '삭제에 실패했습니다.');
+    }
+  };
+
   const handleReaction = async (emotionId, reactionType) => {
     try {
       await api.post(`/shared-emotions/${emotionId}/react`, {
@@ -69,6 +102,10 @@ const SharedEmotionBoard = () => {
       console.error('Failed to react:', error);
       alert('반응 추가에 실패했습니다.');
     }
+  };
+
+  const canEdit = (emotion) => {
+    return user && (user.id === emotion.user_id || user.id === 1);
   };
 
   const getReactionEmoji = (type) => {
@@ -211,29 +248,94 @@ const SharedEmotionBoard = () => {
                     borderColor: 'rgba(139, 92, 246, 0.3)'
                   }}
                 >
-                  <p className="text-lg mb-4">{emotion.content}</p>
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-400">
-                      <span>{emotion.username}</span>
-                      <span className="mx-2">•</span>
-                      <span>{new Date(emotion.created_at).toLocaleString('ko-KR')}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      {['empty', 'laugh', 'void'].map((type) => (
+                  {editingId === emotion.id ? (
+                    // 수정 모드
+                    <div className="space-y-3">
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full h-24 px-3 py-2 rounded border"
+                        style={{
+                          backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                          borderColor: 'var(--color-vhs-purple)'
+                        }}
+                        maxLength={300}
+                      />
+                      <div className="flex gap-2 justify-end">
                         <button
-                          key={type}
-                          onClick={() => handleReaction(emotion.id, type)}
-                          className="flex items-center gap-1 px-3 py-1 rounded-full transition-all hover:scale-110"
-                          style={{
-                            backgroundColor: 'rgba(139, 92, 246, 0.2)'
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditContent('');
                           }}
+                          className="px-4 py-1 rounded text-sm"
+                          style={{ backgroundColor: 'rgba(139, 92, 246, 0.2)' }}
                         >
-                          <span>{getReactionEmoji(type)}</span>
-                          <span className="text-sm">{emotion[`reaction_${type}`]}</span>
+                          취소
                         </button>
-                      ))}
+                        <button
+                          onClick={() => handleEdit(emotion.id)}
+                          className="px-4 py-1 rounded text-sm"
+                          style={{ backgroundColor: 'var(--color-vhs-purple)' }}
+                        >
+                          저장
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <p className="text-lg mb-4">{emotion.content}</p>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <div className="text-sm text-gray-400">
+                            <span>{emotion.username}</span>
+                            {user?.id === 1 && (
+                              <span className="ml-2 text-xs px-2 py-1 rounded" style={{ backgroundColor: 'rgba(255, 215, 0, 0.2)', color: '#FFD700' }}>
+                                👤 user_id: {emotion.user_id}
+                              </span>
+                            )}
+                            <span className="mx-2">•</span>
+                            <span>{new Date(emotion.created_at).toLocaleString('ko-KR')}</span>
+                          </div>
+                          {canEdit(emotion) && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingId(emotion.id);
+                                  setEditContent(emotion.content);
+                                }}
+                                className="text-xs px-3 py-1 rounded hover:opacity-80"
+                                style={{ backgroundColor: 'rgba(160, 255, 184, 0.2)', color: 'var(--color-toxic-green)' }}
+                              >
+                                수정
+                              </button>
+                              <button
+                                onClick={() => handleDelete(emotion.id)}
+                                className="text-xs px-3 py-1 rounded hover:opacity-80"
+                                style={{ backgroundColor: 'rgba(255, 0, 0, 0.2)', color: '#ff6b6b' }}
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          {['empty', 'laugh', 'void'].map((type) => (
+                            <button
+                              key={type}
+                              onClick={() => handleReaction(emotion.id, type)}
+                              className="flex items-center gap-1 px-3 py-1 rounded-full transition-all hover:scale-110"
+                              style={{
+                                backgroundColor: 'rgba(139, 92, 246, 0.2)'
+                              }}
+                            >
+                              <span>{getReactionEmoji(type)}</span>
+                              <span className="text-sm">{emotion[`reaction_${type}`]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>

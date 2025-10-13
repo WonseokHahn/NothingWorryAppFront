@@ -35,71 +35,51 @@ const Layout = ({ children }) => {
             {/* Logo */}
             <Link to="/">
               <motion.h1
-                className="text-2xl md:text-3xl font-pixel text-toxic-green glitch-text"
+                className="text-2xl md:text-3xl font-pixel text-toxic-green glitch-text whitespace-nowrap"
                 whileHover={{ scale: 1.05 }}
               >
                 무의미한 위로소
               </motion.h1>
             </Link>
 
-            {/* Desktop Nav */}
-            {isAuthenticated && (
-              <nav className="hidden md:flex items-center gap-6">
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`font-retro transition-colors ${
-                      location.pathname === item.path
-                        ? 'text-toxic-green'
-                        : 'text-ash-beige hover:text-vhs-purple'
-                    }`}
-                  >
-                    <span className="mr-2">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-            )}
-
             {/* Auth Controls */}
             <div className="flex items-center gap-4">
               {isAuthenticated ? (
                 <>
                   <div className="hidden md:block">
-                    <span className="text-sm font-retro text-gray-400">
+                    <span className="text-sm font-retro text-gray-400 whitespace-nowrap">
                       👤 {user?.username}
                     </span>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="px-4 py-2 bg-red-900/50 hover:bg-red-900/70 border border-red-700 rounded-lg font-retro text-sm transition-colors"
+                    className="hidden md:block px-4 py-2 bg-red-900/50 hover:bg-red-900/70 border border-red-700 rounded-lg font-retro text-sm transition-colors whitespace-nowrap"
                   >
-                    로그아웃
+                    OUT
                   </button>
                 </>
               ) : (
                 <div className="flex gap-2">
                   <Link
                     to="/login"
-                    className="px-4 py-2 bg-vhs-purple/50 hover:bg-vhs-purple/70 border border-vhs-purple rounded-lg font-retro text-sm transition-colors"
+                    className="px-4 py-2 bg-vhs-purple/50 hover:bg-vhs-purple/70 border border-vhs-purple rounded-lg font-retro text-sm transition-colors whitespace-nowrap"
                   >
-                    로그인
+                    IN
                   </Link>
                   <Link
                     to="/signup"
-                    className="px-4 py-2 bg-toxic-green/20 hover:bg-toxic-green/30 border border-toxic-green rounded-lg font-retro text-sm transition-colors"
+                    className="px-4 py-2 bg-toxic-green/20 hover:bg-toxic-green/30 border border-toxic-green rounded-lg font-retro text-sm transition-colors whitespace-nowrap"
                   >
-                    회원가입
+                    NEW
                   </Link>
                 </div>
               )}
 
-              {/* Mobile Menu Toggle */}
+              {/* Hamburger Menu Toggle - Show on ALL screen sizes */}
               {isAuthenticated && (
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="md:hidden p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
                 >
                   {menuOpen ? '✕' : '☰'}
                 </button>
@@ -108,16 +88,16 @@ const Layout = ({ children }) => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Hamburger Menu - Show on ALL screen sizes */}
         {menuOpen && isAuthenticated && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="md:hidden border-t border-vhs-purple/30 bg-gray-900"
+            className="border-t border-vhs-purple/30 bg-gray-900"
           >
             <nav className="flex flex-col p-4 gap-2">
               <div className="p-3 border-b border-gray-700 mb-2">
-                <span className="text-sm font-retro text-gray-400">
+                <span className="text-sm font-retro text-gray-400 whitespace-nowrap">
                   👤 {user?.username}
                 </span>
               </div>
@@ -126,7 +106,7 @@ const Layout = ({ children }) => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMenuOpen(false)}
-                  className={`p-3 rounded-lg font-retro transition-colors ${
+                  className={`p-3 rounded-lg font-retro transition-colors whitespace-nowrap ${
                     location.pathname === item.path
                       ? 'bg-vhs-purple text-white'
                       : 'hover:bg-gray-800'
@@ -141,7 +121,7 @@ const Layout = ({ children }) => {
                   setMenuOpen(false)
                   handleLogout()
                 }}
-                className="p-3 mt-2 rounded-lg font-retro bg-red-900/50 hover:bg-red-900/70 border border-red-700 transition-colors text-left"
+                className="p-3 mt-2 rounded-lg font-retro bg-red-900/50 hover:bg-red-900/70 border border-red-700 transition-colors text-left whitespace-nowrap"
               >
                 로그아웃
               </button>
