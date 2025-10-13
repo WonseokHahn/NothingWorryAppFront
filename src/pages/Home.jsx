@@ -38,6 +38,30 @@ const Home = () => {
       description: '당신의 무의미한 감정 여정을 돌아보세요',
       color: 'from-emerald-900 to-emerald-700',
     },
+    {
+      path: '/shared-emotions',
+      icon: '💭',
+      title: '공유되는 허무',
+      description: '익명으로 감정을 공유하고 다른 이들과 공감하세요',
+      color: 'from-pink-900 to-pink-700',
+      badge: 'NEW',
+    },
+    {
+      path: '/forum',
+      icon: '💬',
+      title: '무의미 게시판',
+      description: '허무한 주제로 토론하세요. AI 철학자가 끼어듭니다',
+      color: 'from-cyan-900 to-cyan-700',
+      badge: 'NEW',
+    },
+    {
+      path: '/daily-quest',
+      icon: '✨',
+      title: '일일 무의미 퀘스트',
+      description: '매일 하나씩, 의미 없는 일을 해보세요',
+      color: 'from-amber-900 to-amber-700',
+      badge: 'NEW',
+    },
   ]
 
   return (
@@ -71,10 +95,15 @@ const Home = () => {
           >
             <Link to={feature.path}>
               <motion.div
-                className={`card-retro bg-gradient-to-br ${feature.color} h-full cursor-pointer group`}
+                className={`card-retro bg-gradient-to-br ${feature.color} h-full cursor-pointer group relative`}
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95 }}
               >
+                {feature.badge && (
+                  <span className="absolute top-2 right-2 px-2 py-1 bg-toxic-green text-dark-void text-xs font-retro rounded">
+                    {feature.badge}
+                  </span>
+                )}
                 <div className="text-5xl mb-4 group-hover:animate-slow-pulse">
                   {feature.icon}
                 </div>

@@ -10,6 +10,11 @@ import NothingHappened from './pages/NothingHappened'
 import UselessFortune from './pages/UselessFortune'
 import Procrastination from './pages/Procrastination'
 import History from './pages/History'
+import SharedEmotionBoard from './pages/SharedEmotionBoard'
+import MeaninglessForum from './pages/MeaninglessForum'
+import ForumPost from './pages/ForumPost'
+import NewForumPost from './pages/NewForumPost'
+import DailyQuest from './pages/DailyQuest'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import About from './pages/About'
@@ -74,6 +79,46 @@ function App() {
               element={
                 <ProtectedRoute>
                   <History />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/shared-emotions"
+              element={
+                <ProtectedRoute>
+                  <SharedEmotionBoard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/forum"
+              element={
+                <ProtectedRoute>
+                  <MeaninglessForum />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/forum/new"
+              element={
+                <ProtectedRoute>
+                  <NewForumPost />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/forum/post/:id"
+              element={
+                <ProtectedRoute>
+                  <ForumPost />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/daily-quest"
+              element={
+                <ProtectedRoute>
+                  <DailyQuest />
                 </ProtectedRoute>
               }
             />

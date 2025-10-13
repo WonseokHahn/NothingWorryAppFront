@@ -16,6 +16,9 @@ const Layout = ({ children }) => {
     { path: '/fortune', label: '쓸모없는 예언', icon: '🔮' },
     { path: '/procrastination', label: '미루기 정당화', icon: '😴' },
     { path: '/history', label: '감정 기록', icon: '📚' },
+    { path: '/shared-emotions', label: '공유되는 허무', icon: '💭' },
+    { path: '/forum', label: '무의미 게시판', icon: '💬' },
+    { path: '/daily-quest', label: '일일 퀘스트', icon: '✨' },
   ]
 
   const handleLogout = () => {
